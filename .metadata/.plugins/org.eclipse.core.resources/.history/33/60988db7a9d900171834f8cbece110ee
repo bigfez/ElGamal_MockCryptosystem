@@ -1,0 +1,86 @@
+import java.util.*;
+
+public class elGamal {
+
+	
+	public static void main(String[] args) {
+		Scanner in = new Scanner(System.in);
+		int p, al, b, a;		
+		int [] cText = new int[1];
+
+		System.out.println("Welcome to the ElGamal Cryptosystem simulation!\n");
+		
+		System.out.print("Please enter a value for p (up to 100,000 max): ");
+		p = in.nextInt();
+		while(p > 100000 || p < 1){
+			System.out.print("Incorrect value, please stay in range (1 - 100,000): ");
+			p = in.nextInt();
+		}
+		
+		System.out.print("Please enter a value for alpha: ");
+		al = in.nextInt();
+		while(al > p || al < 1){
+			System.out.print("Incorrect value, please stay in range (1 - " + p + "): ");
+			al = in.nextInt();
+		}
+		
+		System.out.print("Please enter a value for beta: ");
+		b = in.nextInt();
+		while(b > p || b < 1){
+			System.out.print("Incorrect value, please stay in range (1 - " + p + "): ");
+			b = in.nextInt();
+		}
+		
+		System.out.println("Your public key is now: (" + p + ", " + al + ", " + b + ")\n");
+		
+		System.out.print( ( (int) (Math.pow(23, 31))) % 97);
+		
+		//a = findA(p, al, b);
+		
+		//System.out.println("a = " + a + "\n\n" + "al ^ a = " + (Math.pow(al, a)) + "\n\n" + "mod " + p + " = " + (Math.pow(al, a))%p );
+		
+		
+		//int m = decryptCT(p, al, b, a, cText);
+		
+	}
+
+	public static int findA(int p, int al, int b) {
+		int a = 1, temp;
+		while(a < p){
+			temp = ( ((int)(Math.pow(al, a))) % p);
+			if(temp == b)
+				break;
+			else
+				a++;
+		}
+		return a;
+	}
+	
+	public static int decryptCT(int p, int al, int b, int a, int[] CT){
+		int[] euclid = inverseA(CT[0], p);
+		int s = euclid[1];
+		int alphaInverse = (int) (Math.pow(s, a) % p);
+		int message = computeM(CT[1], alphaInverse, p);
+		
+		return message;
+	}
+	
+	public static int computeM(int t, int alphaInv, int mod){
+		int m = t * alphaInv;
+		m = m % mod;
+		return m;
+		
+	}
+	
+	public static int[] inverseA(int x, int m) {
+		if (m == 0)
+			return new int[] { x, 1, 0 };
+		int[] vals = inverseA(m, x % m);
+		int d = vals[0];
+		int a = vals[2];
+		int b = vals[1] - (x / m) * vals[2];
+		return new int[] { d, a, b };
+	}
+	
+	
+}

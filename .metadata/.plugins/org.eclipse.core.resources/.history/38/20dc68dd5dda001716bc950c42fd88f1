@@ -1,0 +1,145 @@
+import java.util.*;
+
+public class elGamal {
+
+	
+	public static void main(String[] args) {
+		Scanner in = new Scanner(System.in);
+		int p, al, b, a;		
+		int [] cText = new int[2];
+
+		System.out.println("Welcome to the ElGamal Cryptosystem simulation!\n");
+		
+		System.out.print("Please enter a value for p (up to 100,000 max): ");
+		p = in.nextInt();
+		while(p > 100000 || p < 1){
+			System.out.print("Incorrect value, please stay in range (1 - 100,000): ");
+			p = in.nextInt();
+		}
+		
+		System.out.print("Please enter a value for alpha: ");
+		al = in.nextInt();
+		while(al > p || al < 1){
+			System.out.print("Incorrect value, please stay in range (1 - " + p + "): ");
+			al = in.nextInt();
+		}
+		
+		System.out.print("Please enter a value for beta: ");
+		b = in.nextInt();
+		while(b > p || b < 1){
+			System.out.print("Incorrect value, please stay in range (1 - " + p + "): ");
+			b = in.nextInt();
+		}
+		
+		System.out.println("Your public key is now: (" + p + ", " + al + ", " + b + ")\n");
+		
+		a = findA(p, al, b);
+		
+		//System.out.print("a = " + a + " mod " + p);
+		
+		System.out.print("Please enter first value for CipherText pair (r, t): ");
+		cText[0] = in.nextInt();
+		while(cText[0] > p || cText[0] < 1){
+			System.out.print("Incorrect value, please stay in range (1 - " + p + "): ");
+			cText[0] = in.nextInt();
+		}
+		
+		System.out.print("Please enter second value for CipherText pair (r, t): ");
+		cText[1] = in.nextInt();
+		while(cText[1] > p || cText[1] < 1){
+			System.out.print("Incorrect value, please stay in range (1 - " + p + "): ");
+			cText[1] = in.nextInt();
+		}
+		
+		System.out.println("The CT pair is now ("+ cText[0] + ", " + cText[1] + ")\n");
+		
+		int m = decryptCT(p, a, cText);
+		in.close();
+	}
+
+	public static int findA(int p, int al, int b) {
+		int temp = 1, count = 0;
+		for(int a = 1; a < p; a++){
+			temp = temp * al;
+			temp = temp % p;
+			count++;
+			if(temp == b){
+				return count;
+			}	
+		}
+		return 0;
+	}
+	
+	public static int decryptCT(int p, int a, int[] CT){
+		int[] euclid = inverseR(CT[0], p);
+		int rInv = euclid[1];
+		//System.out.println("Inverse of r mod " + p + " = " + rInv);
+		int rInvA = modArithmetic(p, rInv, a);
+		//System.out.println("r to the power of -a mod " + p + " = " + rInvA);
+		int message = computeM(CT[1], rInvA, p);
+		System.out.println("The PlainText for this CT pair ("+ CT[0] + ", " + CT[1] + ") = " + message);
+		int [] nums = convertCT(message);
+		System.out.println(nums[0] + " " + nums[1] + " " + nums[2]);
+		return message;
+	}
+	
+	public static int modArithmetic(int p, int base, int pwr){
+		int temp = 1;
+		for(int a = 0; a < pwr; a++){
+			temp = temp * base;
+			temp = temp % p;	
+		}
+		return temp;
+	}
+	
+	public static int computeM(int t, int rInvA, int mod){
+		int m = t * rInvA;
+		m = m % mod;
+		return m;
+		
+	}
+	
+	public static int [] convertCT(int m){
+		int a = 0, b=0, c=0, temp, count = 0;
+		boolean found = false;
+		//if(m < 676)
+		//	a = 0;
+		while(!found && count < 26){
+			temp = 676 * count; 
+			if(temp > m){
+				a = count - 1;
+				m = m - (676*a);
+				found = true;
+			}
+			else
+				count++;
+		}
+		found = false;
+		//if(m < 26)
+		//	b = 0;
+		while(!found && count < 26){
+			temp = 26 * count; 
+			if(temp > m){
+				a = count - 1;
+				m = m - (26*a);
+				found = true;
+			}
+			else
+				count++;
+		}
+		c = m;
+		return new int[]{a, b, c};
+	}
+	
+	public static int[] inverseR(int x, int m) {
+		if (m == 0)
+			return new int[] {x, 1, 0};
+		int[] nums = inverseR(m, x % m);
+		int d = nums[0];
+		int a = nums[2];
+		int b = nums[1] - (x / m) * nums[2];
+		return new int[] {d, a, b};
+	}
+	
+	
+}
